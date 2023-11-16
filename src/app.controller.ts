@@ -36,7 +36,6 @@ export class AppController {
           })
           .then(response => {
             console.log('Form submitted successfully');
-            // Hier können Sie eine Bestätigung anzeigen
           })
           .catch(error => console.error('Error:', error));
         });
@@ -50,9 +49,8 @@ export class AppController {
     @Body() producerDto: ProducerDto,
     @Res() res: Response,
   ) {
-    console.log(producerDto) // Logge die Daten aus dem Request-Body
+    console.log(producerDto)
     await this.producerService.createProducer(producerDto)
-    // Hier kannst du eine Bestätigung senden oder eine Weiterleitung durchführen
-    res.send('Producer erfolgreich erstellt') // Beispiel für eine einfache Bestätigung
+    res.send('Producer erfolgreich erstellt')
   }
 }
