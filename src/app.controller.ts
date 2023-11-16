@@ -2,12 +2,17 @@ import {Body, Controller, Get, Post, Res} from '@nestjs/common'
 import {Response} from 'express'
 import {ProducerService} from './producer/producer.service'
 import {ProducerDto} from './producer/dto'
+import {Type} from './producer/enum'
 
 @Controller()
 export class AppController {
   constructor(private readonly producerService: ProducerService) {}
   @Get()
   renderForm(@Res() res: Response) {
+    const typesOptions = Object.values(Type)
+      .map((type) => `<option value="${type}">${type}</option>`)
+      .join('')
+
     const html = `
       <h1>Add new producer</h1>
       <form id="producerForm" action="/" method="POST">
@@ -15,10 +20,12 @@ export class AppController {
         <input name="name" />
         
         <label for="type">Type</label>
-        <input name="type">
+        <select name="type">
+          ${typesOptions}
+        </select>
         
         <label for="capacity">Capacity per Minute</label>
-        <input name="capacity">
+        <input name="capacity" type="number">
 
         <button type="submit">Add</button>
       </form>
