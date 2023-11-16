@@ -3,14 +3,8 @@ import {AppModule} from './app.module'
 import {connect as connectToEventStore} from './eventstore'
 
 async function bootstrap() {
-  try {
-    const app = await NestFactory.create(AppModule)
-    connectToEventStore()
-    await app.listen(3000)
-  } catch (error) {
-    console.error('Failed to start the application:', error)
-    process.exit(1)
-  }
+  const app = await NestFactory.create(AppModule)
+  connectToEventStore()
+  await app.listen(3333)
 }
-
-bootstrap().then(() => console.log('NestJS app started listening on port 3000'))
+bootstrap().then(() => console.log('Application is listening on port 3333'))

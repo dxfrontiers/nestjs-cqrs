@@ -1,112 +1,58 @@
-import {Body, Controller, Get, Post, Redirect} from '@nestjs/common'
-import {getAllPurchases, Purchase} from './views'
-import {v4 as uuid} from 'uuid'
-import {jsonEvent} from '@eventstore/db-client'
-import {client as eventStore} from './eventstore'
-
-interface CreatePurchaseRequest {
-  amount: string
-  name: string
-}
-
-interface RefundPurchaseRequest {
-  purchaseId: string
-}
+import {Body, Controller, Get, Post, Res} from '@nestjs/common'
+import {Response} from 'express'
+import {ProducerService} from './producer/producer.service'
+import {ProducerDto} from './producer/dto'
 
 @Controller()
 export class AppController {
-  constructor() {}
-
+  constructor(private readonly producerService: ProducerService) {}
   @Get()
-  async getPurchases(): Promise<string> {
-    const purchases = await getAllPurchases()
+  renderForm(@Res() res: Response) {
+    const html = `
+      <h1>Add new producer</h1>
+      <form id="producerForm" action="/" method="POST">
+        <label for="name">Address</label>
+        <input name="name" />
+        
+        <label for="type">Type</label>
+        <input name="type">
+        
+        <label for="capacity">Capacity per Minute</label>
+        <input name="capacity">
 
-    let html = listAllPurchasesUL(purchases)
-    html += renderCreatePurchaseForm()
-
-    return html
+        <button type="submit">Add</button>
+      </form>
+      
+      <script>
+        document.getElementById('producerForm').addEventListener('submit', function(event) {
+          event.preventDefault();
+          const formData = new FormData(this);
+          fetch('/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams([...formData]).toString()
+          })
+          .then(response => {
+            console.log('Form submitted successfully');
+            // Hier können Sie eine Bestätigung anzeigen
+          })
+          .catch(error => console.error('Error:', error));
+        });
+      </script>
+    `
+    res.send(html)
   }
 
   @Post()
-  @Redirect()
-  async create(@Body() req: CreatePurchaseRequest) {
-    const purchaseId = uuid()
-    const purchasedEvent = jsonEvent({
-      type: 'ProductPurchased',
-      data: {
-        purchaseId: purchaseId,
-        amount: req.amount,
-        name: req.name,
-      },
-    })
-
-    await eventStore.appendToStream(purchaseId, [purchasedEvent])
-
-    return {
-      url: '/',
-    }
+  async handleFormSubmit(
+    @Body() producerDto: ProducerDto,
+    @Res() res: Response,
+  ) {
+    console.log(producerDto) // Logge die Daten aus dem Request-Body
+    await this.producerService.createProducer(producerDto)
+    // Hier kannst du eine Bestätigung senden oder eine Weiterleitung durchführen
+    res.send('Producer erfolgreich erstellt') // Beispiel für eine einfache Bestätigung
   }
-
-  @Post('/refund')
-  @Redirect()
-  async refund(@Body() req: RefundPurchaseRequest) {
-    const refundEvent = jsonEvent({
-      type: 'ProductRefunded',
-      data: {
-        purchaseId: req.purchaseId,
-      },
-    })
-
-    await eventStore.appendToStream(req.purchaseId, [refundEvent])
-
-    return {
-      url: '/',
-    }
-  }
-}
-
-function listAllPurchasesUL(purchases: Purchase[]) {
-  let html = `
-    <h1>Existing Purchases:</h1>
-    <ul>`
-  for (const p of purchases) {
-    html += `
-        <li style="${p.wasRefunded ? 'color: red' : ''}">
-            <div>Purchase Id: ${p.purchaseId}</div>
-            <div>Amount: ${p.amount}</div>
-            <div>Name: ${p.name}</div>
-            ${p.wasRefunded ? '<div>Was refunded</div>' : ''}
-            ${renderRefundButton(p)}
-            <hr />
-        </li>`
-  }
-  html += `</ul>`
-
-  return html
-}
-
-function renderRefundButton(p: Purchase): string {
-  if (p.wasRefunded) return ''
-
-  return `
-      <form action="/refund" method="POST">
-        <input type="hidden" name="purchaseId" value="${p.purchaseId}" />
-        <button type="submit">Refund</button>
-      </form>
-  `
-}
-
-function renderCreatePurchaseForm() {
-  return `
-    <h1>Make A Purchase:</h1>
-      <form action="/" method="POST">
-        <label for="amount">Amount:</label>
-        <input type="number" name="amount" />
-
-        <label for="name">Name:</label>
-        <input name="name" />
-
-        <button type="submit">Create</button>
-      </form>
-    `
 }
