@@ -7,7 +7,7 @@ import {AddProducerCommand} from './commands'
 export class ProducerService {
   constructor(private readonly commandBus: CommandBus) {}
 
-  async createProducer(producer: ProducerDto) {
+  async createProducer(producer: ProducerDto): Promise<void> {
     return await this.commandBus.execute(new AddProducerCommand(producer))
   }
 }

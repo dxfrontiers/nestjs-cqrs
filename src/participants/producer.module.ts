@@ -2,8 +2,9 @@ import {Module} from '@nestjs/common'
 import {ProducerService} from './producer.service'
 import {ProducerController} from './producer.controller'
 import {CqrsModule} from '@nestjs/cqrs'
-import {AddProducerHandler, ProducerCreatedEventHandler} from './handler'
+import {AddProducerHandler} from './commandHandler'
 import {ProducerRepository} from './repositories'
+import {ProducerCreatedEventHandler} from './eventHandler'
 
 @Module({
   imports: [CqrsModule],

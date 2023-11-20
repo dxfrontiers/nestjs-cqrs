@@ -5,3 +5,8 @@ export class ProducerDto {
   readonly type: Type
   readonly capacity: number
 }
+
+export class StorageUnitDto {
+  readonly id: string
+  readonly capacity: number
+}
