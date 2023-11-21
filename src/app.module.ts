@@ -5,6 +5,7 @@ import {AppService} from './app.service'
 import {ProducerModule} from './participants/producer.module'
 import {StorageUnitModule} from './participants/storageUnit.module'
 import {ConfigModule, ConfigService} from '@nestjs/config'
+import {CapacityReadModel} from './participants/model'
 
 @Module({
   imports: [
@@ -24,8 +25,9 @@ import {ConfigModule, ConfigService} from '@nestjs/config'
         database: configService.get('DB_NAME'),
         autoLoadEntities: true,
         synchronize: true,
+        entities: [CapacityReadModel],
       }),
-      inject: [ConfigService], // Inject ConfigService in die useFactory-Funktion.
+      inject: [ConfigService],
     }),
   ],
   controllers: [AppController],

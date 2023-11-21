@@ -1,9 +1,10 @@
 // EventHandler persists the event to the event store
 import {EventsHandler, IEventHandler} from '@nestjs/cqrs'
 import {ProducerCreatedEvent, StorageUnitCreatedEvent} from './events'
-import {jsonEvent} from '@eventstore/db-client'
+import {AppendResult, jsonEvent} from '@eventstore/db-client'
 import {client as eventStore} from '../eventstore'
 import {v4 as uuid} from 'uuid'
+import {CapacityReadModelService} from './readModel.service'
 
 @EventsHandler(ProducerCreatedEvent)
 export class ProducerCreatedEventHandler
@@ -27,6 +28,7 @@ export class ProducerCreatedEventHandler
 export class StorageUnitCreatedEventHandler
   implements IEventHandler<StorageUnitCreatedEvent>
 {
+  constructor(private readonly capacityService: CapacityReadModelService) {}
   async handle(event: StorageUnitCreatedEvent): Promise<void> {
     const eventData = jsonEvent({
       type: 'StorageUnitCreated',
@@ -36,8 +38,18 @@ export class StorageUnitCreatedEventHandler
       },
     })
 
-    await eventStore.appendToStream('storage-unit-stream-' + uuid(), [
-      eventData,
-    ])
+    const result: AppendResult = await eventStore.appendToStream(
+      'storage-unit-stream-' + uuid(),
+      [eventData],
+    )
+
+    if (result.success) {
+      const updatedCapacity =
+        (await this.capacityService.sourceAllStorageUnitCreatedCapacity()) +
+        event.data.capacity
+      await this.capacityService.updateTotalCapacity(updatedCapacity)
+    }
+
+    console.log('result: ', result)
   }
 }
