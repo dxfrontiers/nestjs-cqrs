@@ -2,6 +2,7 @@ import {Type} from './enum'
 import {AggregateRoot} from '@nestjs/cqrs'
 import {ProducerDto, StorageUnitDto} from './dto'
 import {ProducerCreatedEvent, StorageUnitCreatedEvent} from './events'
+import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm'
 
 export class Producer extends AggregateRoot {
   id: string
@@ -47,4 +48,13 @@ export class StorageUnit extends AggregateRoot {
   applyEvent(): void {
     this.apply(new StorageUnitCreatedEvent(this.getData()))
   }
+}
+
+@Entity()
+export class CapacityReadModel {
+  @PrimaryGeneratedColumn()
+  id: number
+
+  @Column()
+  totalCapacity: number
 }
