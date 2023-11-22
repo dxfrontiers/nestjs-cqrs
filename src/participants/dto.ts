@@ -4,6 +4,7 @@ import {IsNumber} from 'class-validator'
 export class ProducerDto {
   readonly id: string
   readonly type: Type
+  @IsNumber()
   readonly capacity: number
 }
 

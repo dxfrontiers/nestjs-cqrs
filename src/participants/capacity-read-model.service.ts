@@ -24,11 +24,15 @@ export class CapacityReadModelService {
 
       switch (event?.type) {
         case 'StorageUnitCreated':
-          createdEventsCapacities.push(Number(data.capacity))
+          if (data?.capacity != null) {
+            createdEventsCapacities.push(Number(data.capacity))
+          }
           console.log('data.capacity: ', data.capacity)
           break
         case 'StorageUnitDestroyed':
-          createdEventsCapacities.push(Number(-data.capacity))
+          if (data?.capacity != null) {
+            createdEventsCapacities.push(Number(-data.capacity))
+          }
           console.log('data.capacity: ', data.capacity)
           break
       }
@@ -52,3 +56,6 @@ export class CapacityReadModelService {
     await this.capacityRepository.save(capacityRecord)
   }
 }
+
+@Injectable()
+export class StorageUnitCreatedReadModelService {}

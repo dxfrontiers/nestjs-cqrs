@@ -1,5 +1,5 @@
 import {Body, Controller, Post} from '@nestjs/common'
-import {StorageUnitService} from './storageUnit.service'
+import {StorageUnitService} from './storage-unit.service'
 import {StorageUnitDto} from './dto'
 
 @Controller('storageUnit')

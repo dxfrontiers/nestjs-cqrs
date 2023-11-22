@@ -1,6 +1,6 @@
 import {Body, Controller, Get, Post, Res} from '@nestjs/common'
 import {Response} from 'express'
-import {StorageUnitService} from './participants/storageUnit.service'
+import {StorageUnitService} from './participants/storage-unit.service'
 import {ProducerService} from './participants/producer.service'
 import {ProducerDto, StorageUnitDto} from './participants/dto'
 import {Type} from './participants/enum'
@@ -17,7 +17,7 @@ export class AppController {
       .map((type) => `<option value="${type}">${type}</option>`)
       .join('')
 
-    const html = `
+    const html: string = `
       <h1>Add new producer</h1>
       <form id="producer-form" action="/create-producer" method="POST">
         <label for="type">Type</label>
@@ -38,6 +38,40 @@ export class AppController {
 
         <button type="submit">Add</button>
       </form>
+      
+      <script>
+        document.getElementById('producer-form').addEventListener('submit', function(event) {
+          event.preventDefault();
+          const formData = new FormData(this);
+          fetch('/create-producer', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams([...formData]).toString()
+          })
+          .then(response => {
+            console.log('Form submitted successfully');
+          })
+          .catch(error => console.error('Error:', error));
+        });
+        
+        document.getElementById('storage-unit-form').addEventListener('submit', function(event) {
+          event.preventDefault();
+          const formData = new FormData(this);
+          fetch('/create-storage-unit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams([...formData]).toString()
+          })
+          .then(response => {
+            console.log('Form submitted successfully');
+          })
+          .catch(error => console.error('Error:', error));
+        });
+      </script>
     `
     res.send(html)
   }

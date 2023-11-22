@@ -3,7 +3,7 @@ import {TypeOrmModule} from '@nestjs/typeorm'
 import {AppController} from './app.controller'
 import {AppService} from './app.service'
 import {ProducerModule} from './participants/producer.module'
-import {StorageUnitModule} from './participants/storageUnit.module'
+import {StorageUnitModule} from './participants/storage-unit.module'
 import {ConfigModule, ConfigService} from '@nestjs/config'
 import {CapacityReadModel} from './participants/model'
 
