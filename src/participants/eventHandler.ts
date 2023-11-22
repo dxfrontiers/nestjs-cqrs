@@ -44,9 +44,10 @@ export class StorageUnitCreatedEventHandler
     )
 
     if (result.success) {
-      const updatedCapacity =
+      console.log('event.data.capacity: ', event.data.capacity)
+      const updatedCapacity: number =
         (await this.capacityService.sourceAllStorageUnitCreatedCapacity()) +
-        event.data.capacity
+        Number(event.data.capacity)
       await this.capacityService.updateTotalCapacity(updatedCapacity)
     }
 

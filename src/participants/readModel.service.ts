@@ -25,16 +25,18 @@ export class CapacityReadModelService {
       switch (event?.type) {
         case 'StorageUnitCreated':
           createdEventsCapacities.push(Number(data.capacity))
+          console.log('data.capacity: ', data.capacity)
           break
         case 'StorageUnitDestroyed':
           createdEventsCapacities.push(Number(-data.capacity))
+          console.log('data.capacity: ', data.capacity)
           break
       }
     }
 
     const totalCapacity: number = createdEventsCapacities.reduce(
       (acc: number, curr: number) => {
-        return acc + curr
+        return Number(acc) + Number(curr)
       },
       0,
     )
@@ -43,29 +45,10 @@ export class CapacityReadModelService {
     return totalCapacity
   }
 
-  async getLatestCapacityRecord(): Promise<CapacityReadModel | null> {
-    const query = 'SELECT * FROM capacity_read_model ORDER BY id DESC LIMIT 1'
-    const result = await this.capacityRepository.query(query)
-
-    if (result.length > 0) {
-      return result[0]
-    }
-
-    console.log('result: ', result)
-
-    return null
-  }
-
   async updateTotalCapacity(newTotalCapacity: number): Promise<void> {
-    const capacityRecord: CapacityReadModel =
-      await this.getLatestCapacityRecord()
-    if (capacityRecord) {
-      capacityRecord.totalCapacity = newTotalCapacity
-    } else {
-      const newCapacityRecord = new CapacityReadModel()
-      newCapacityRecord.totalCapacity = newTotalCapacity
-      await this.capacityRepository.save(newCapacityRecord)
-    }
+    const capacityRecord: CapacityReadModel = new CapacityReadModel()
+    capacityRecord.totalCapacity = newTotalCapacity
+
     await this.capacityRepository.save(capacityRecord)
   }
 }

@@ -1,4 +1,5 @@
 import {Type} from './enum'
+import {IsNumber} from 'class-validator'
 
 export class ProducerDto {
   readonly id: string
@@ -8,5 +9,6 @@ export class ProducerDto {
 
 export class StorageUnitDto {
   readonly id: string
+  @IsNumber()
   readonly capacity: number
 }
