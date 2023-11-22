@@ -8,23 +8,24 @@ import {
 import {AppendResult, jsonEvent} from '@eventstore/db-client'
 import {client as eventStore} from '../eventstore'
 import {v4 as uuid} from 'uuid'
-import {CapacityReadModelService} from './capacity-read-model.service'
+import {ReadModelService} from './read-model.service'
 
 @EventsHandler(ProducerCreatedEvent)
 export class ProducerCreatedEventHandler
   implements IEventHandler<ProducerCreatedEvent>
 {
   async handle(event: ProducerCreatedEvent): Promise<void> {
+    const id = uuid()
     const eventData = jsonEvent({
       type: 'ProducerCreated',
       data: {
-        id: event.data.id,
+        id: id,
         type: event.data.type,
         capacity: event.data.capacity,
       },
     })
 
-    await eventStore.appendToStream('producer-stream-' + uuid(), [eventData])
+    await eventStore.appendToStream('producer-stream-' + id, [eventData])
   }
 }
 
@@ -32,30 +33,28 @@ export class ProducerCreatedEventHandler
 export class StorageUnitCreatedEventHandler
   implements IEventHandler<StorageUnitCreatedEvent>
 {
-  constructor(private readonly capacityService: CapacityReadModelService) {}
+  constructor(private readonly capacityService: ReadModelService) {}
   async handle(event: StorageUnitCreatedEvent): Promise<void> {
+    const id = uuid()
     const eventData = jsonEvent({
       type: 'StorageUnitCreated',
       data: {
-        id: event.data.id,
+        id: id,
         capacity: event.data.capacity,
       },
     })
 
     const result: AppendResult = await eventStore.appendToStream(
-      'storage-unit-stream-' + uuid(),
+      'storage-unit-stream-' + id,
       [eventData],
     )
 
     if (result.success) {
-      console.log('event.data.capacity: ', event.data.capacity)
       const updatedCapacity: number =
         (await this.capacityService.sourceAllStorageUnitCreatedCapacity()) +
         Number(event.data.capacity)
       await this.capacityService.updateTotalCapacity(updatedCapacity)
     }
-
-    console.log('result: ', result)
   }
 }
 
@@ -63,7 +62,7 @@ export class StorageUnitCreatedEventHandler
 export class StorageUnitOnlineEventHandler
   implements IEventHandler<StorageUnitOnlineEvent>
 {
-  constructor(private readonly capacityService: CapacityReadModelService) {}
+  constructor(private readonly capacityService: ReadModelService) {}
   async handle(event: StorageUnitOnlineEvent): Promise<void> {
     const eventData = jsonEvent({
       type: 'StorageUnitOnlineEvent',
@@ -78,13 +77,10 @@ export class StorageUnitOnlineEventHandler
     )
 
     if (result.success) {
-      console.log('event.data.capacity: ', event.data.capacity)
       const updatedCapacity: number =
         (await this.capacityService.sourceAllStorageUnitCreatedCapacity()) -
         Number(event.data.capacity)
       await this.capacityService.updateTotalCapacity(updatedCapacity)
     }
-
-    console.log('result: ', result)
   }
 }

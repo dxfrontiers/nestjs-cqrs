@@ -6,6 +6,7 @@ import {ProducerModule} from './participants/producer.module'
 import {StorageUnitModule} from './participants/storage-unit.module'
 import {ConfigModule, ConfigService} from '@nestjs/config'
 import {CapacityReadModel} from './participants/model'
+import {ReadModelService} from './participants/read-model.service'
 
 @Module({
   imports: [
@@ -29,8 +30,9 @@ import {CapacityReadModel} from './participants/model'
       }),
       inject: [ConfigService],
     }),
+    TypeOrmModule.forFeature([CapacityReadModel]),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ReadModelService],
 })
 export class AppModule {}

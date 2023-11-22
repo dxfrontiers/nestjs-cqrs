@@ -5,7 +5,7 @@ import {StorageUnitCreatedEventHandler} from './event-handler'
 import {StorageUnitController} from './storage-unit.controller'
 import {StorageUnitService} from './storage-unit.service'
 import {AddStorageUnitHandler} from './command-handler'
-import {CapacityReadModelService} from './capacity-read-model.service'
+import {ReadModelService} from './read-model.service'
 import {TypeOrmModule} from '@nestjs/typeorm'
 import {CapacityReadModel} from './model'
 
@@ -17,7 +17,7 @@ import {CapacityReadModel} from './model'
     StorageUnitRepository,
     AddStorageUnitHandler,
     StorageUnitCreatedEventHandler,
-    CapacityReadModelService,
+    ReadModelService,
   ],
   exports: [StorageUnitService],
 })

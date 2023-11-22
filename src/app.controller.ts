@@ -4,40 +4,55 @@ import {StorageUnitService} from './participants/storage-unit.service'
 import {ProducerService} from './participants/producer.service'
 import {ProducerDto, StorageUnitDto} from './participants/dto'
 import {Type} from './participants/enum'
+import {StorageUnit} from './participants/model'
+import {ReadModelService} from './participants/read-model.service'
 
 @Controller()
 export class AppController {
   constructor(
     private readonly producerService: ProducerService,
     private readonly storageUnitService: StorageUnitService,
+    private readonly ReadModelService: ReadModelService,
   ) {}
+
   @Get()
-  renderForm(@Res() res: Response) {
+  async renderForm(@Res() res: Response) {
     const typesOptions = Object.values(Type)
       .map((type) => `<option value="${type}">${type}</option>`)
       .join('')
 
+    const storageUnits: StorageUnit[] =
+      await this.ReadModelService.sourceAllStorageUnitCreatedEvents()
+
+    const storageUnitsListHtml = listAllStorageUnits(storageUnits)
+
     const html: string = `
-      <h1>Add new producer</h1>
-      <form id="producer-form" action="/create-producer" method="POST">
-        <label for="type">Type</label>
-        <select name="type">
-          ${typesOptions}
-        </select>
-        
-        <label for="capacity">Capacity per Minute</label>
-        <input name="capacity" type="number">
-
-        <button type="submit">Add</button>
-      </form>
-      
-      <h1>Add new stroage unit</h1>
-      <form id="storage-unit-form" action="/create-storage-unit" method="POST">
-        <label for="capacity">Capacity</label>
-        <input name="capacity" type="number">
-
-        <button type="submit">Add</button>
-      </form>
+      <div class="container">
+        <div class="forms">
+          <h1>Add new producer</h1>
+          <form id="producer-form" action="/create-producer" method="POST">
+            <label for="type">Type</label>
+            <select name="type">
+              ${typesOptions}
+            </select>
+            
+            <label for="capacity">Capacity per Minute</label>
+            <input name="capacity" type="number">
+    
+            <button type="submit">Add</button>
+          </form>
+          
+          <h1>Add new stroage unit</h1>
+          <form id="storage-unit-form" action="/create-storage-unit" method="POST">
+            <label for="capacity">Capacity</label>
+            <input name="capacity" type="number">
+            <button type="submit">Add</button>
+          </form>
+        </div>
+        <div class="network">
+          ${storageUnitsListHtml}
+        </div>
+      </div>
       
       <script>
         document.getElementById('producer-form').addEventListener('submit', function(event) {
@@ -52,6 +67,7 @@ export class AppController {
           })
           .then(response => {
             console.log('Form submitted successfully');
+            this.reset();
           })
           .catch(error => console.error('Error:', error));
         });
@@ -59,6 +75,7 @@ export class AppController {
         document.getElementById('storage-unit-form').addEventListener('submit', function(event) {
           event.preventDefault();
           const formData = new FormData(this);
+          
           fetch('/create-storage-unit', {
             method: 'POST',
             headers: {
@@ -68,10 +85,18 @@ export class AppController {
           })
           .then(response => {
             console.log('Form submitted successfully');
+            this.reset();
           })
           .catch(error => console.error('Error:', error));
         });
       </script>
+      <style>
+        .container {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+        }
+      </style>
     `
     res.send(html)
   }
@@ -81,7 +106,6 @@ export class AppController {
     @Body() producerDto: ProducerDto,
     @Res() res: Response,
   ) {
-    console.log(producerDto)
     await this.producerService.createProducer(producerDto)
     res.send('Producer erfolgreich erstellt')
   }
@@ -91,8 +115,25 @@ export class AppController {
     @Body() storageUnitDto: StorageUnitDto,
     @Res() res: Response,
   ) {
-    console.log(storageUnitDto)
     await this.storageUnitService.createStorageUnit(storageUnitDto)
     res.send('Storage Unit erfolgreich erstellt')
   }
+}
+
+function listAllStorageUnits(storageUnits: StorageUnit[]) {
+  let html = `
+    <h1>Existing Storage Units:</h1>
+    <ul>`
+  for (const su of storageUnits) {
+    html += `
+        <li>
+            <div>ID: ${su.id}</div>
+            <div>Capacity: ${su.capacity}</div>
+            <button>Turn off</button>
+            <hr />
+        </li>`
+  }
+  html += `</ul>`
+
+  return html
 }
