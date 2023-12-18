@@ -30,7 +30,6 @@ export class StorageUnitController {
     // TODO: Schauen, wann und wie der Command nicht ausgeführt werden kann
     // wenn schon disabled und entsprechende Response an Client
     await this.commandBus.execute(new DisableStorageUnitCommand(id))
-    console.log("id:", id)
     return { message: 'Storage unit disabled successfully' };
   }
 
@@ -39,7 +38,6 @@ export class StorageUnitController {
     // TODO: Schauen, wann und wie der Command nicht ausgeführt werden kann
     // wenn schon enabled und entsprechende Response an Client
     await this.commandBus.execute(new EnableStorageUnitCommand(id))
-    console.log("id:", id)
     return { message: 'Storage unit enabled successfully' };
   }
 

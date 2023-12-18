@@ -9,7 +9,7 @@ import {
 import {StorageDisabledEvent, StorageEnabledEvent, StorageRegisteredEvent} from './storage.events'
 import {DisableStorageUnitCommand, EnableStorageUnitCommand, RegisterStorageUnitCommand,} from './storage.commands'
 import {StorageCapacityProjection} from '../capacity/storage-capacity.projection'
-import {AppendResult, jsonEvent} from "@eventstore/db-client";
+import {jsonEvent} from "@eventstore/db-client";
 import {client as eventStore} from '../eventstore'
 
 export class StorageAggregate extends AggregateRoot {
@@ -80,8 +80,6 @@ export class StorageAggregate extends AggregateRoot {
       }
       count++;
     }
-    console.log("Anzahl der Events:", count);
-    console.log("aggregate nach dem Event Sourcing:", aggregate);
 
     return aggregate;
 
@@ -110,7 +108,6 @@ export class RegisterStorageUnitHandler
 
   // TODO: Check how publisher works and what can be published
   async execute(command: RegisterStorageUnitCommand): Promise<void> {
-    console.log("command", command)
     /**
      * mergeObjectContext:
      * Merge the event publisher into the provided object.
@@ -133,7 +130,6 @@ export class DisableStorageUnitHandler implements ICommandHandler<DisableStorage
         await StorageAggregate.loadAggregate(command.aggregateId)
     );
     if (!aggregate.disabled) {
-      console.log("Disabling storage unit");
       aggregate.disableStorage();
       aggregate.commit();
     }
@@ -149,7 +145,6 @@ export class EnableStorageUnitHandler implements ICommandHandler<EnableStorageUn
         await StorageAggregate.loadAggregate(command.aggregateId)
     );
     if (aggregate.disabled) {
-      console.log("Enabling storage unit");
       aggregate.enableStorage();
       aggregate.commit();
     }
@@ -172,12 +167,10 @@ export class StorageRegisteredEventHandler
       },
     })
 
-    const result: AppendResult = await eventStore.appendToStream(
+    await eventStore.appendToStream(
         'storage-unit-stream-' + event.aggregateId,
         [eventData],
     )
-
-    console.log('result: ', result)
   }
 }
 
@@ -186,8 +179,6 @@ export class StorageDisabledEventHandler implements IEventHandler<StorageDisable
   constructor(private readonly capacityProjection: StorageCapacityProjection) {}
 
   async handle(event: StorageDisabledEvent): Promise<void> {
-    console.log("handling StorageDisabledEvent")
-    console.log("disabling event:", event)
     const eventData = jsonEvent({
       type: 'StorageUnitDisabled',
       data: {
@@ -195,11 +186,9 @@ export class StorageDisabledEventHandler implements IEventHandler<StorageDisable
         disabledCapacity: event.capacity,
       },
     });
-    const result: AppendResult = await eventStore.appendToStream(
+    await eventStore.appendToStream(
         'storage-unit-stream-' + event.aggregateId,
         [eventData],
     );
-    
-    console.log('StorageDisabledEvent result: ', result);
   }
 }
