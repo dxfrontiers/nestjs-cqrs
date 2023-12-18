@@ -10,3 +10,7 @@ export class RegisterStorageUnitCommand implements ICommand {
 export class DisableStorageUnitCommand implements ICommand {
   constructor(public readonly aggregateId: string) {}
 }
+
+export class EnableStorageUnitCommand implements ICommand {
+  constructor(public readonly aggregateId: string) {}
+}
