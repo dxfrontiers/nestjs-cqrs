@@ -6,7 +6,6 @@ export class StorageCapacityProjection implements IEventHandler<StorageRegistere
   private currentStorageCapacity: number = 0;
 
   handle(event: StorageRegisteredEvent | StorageDisabledEvent): void {
-    console.log('Storage Capacity', this.currentStorageCapacity)
     if (event instanceof StorageRegisteredEvent) {
       this.handleStorageRegistered(event);
     } else if (event instanceof StorageDisabledEvent) {
@@ -14,17 +13,15 @@ export class StorageCapacityProjection implements IEventHandler<StorageRegistere
     }
   }
 
-  /**
-   * Eventhandler for our storage events
-   * Event requires to include the capacity/disabled capacity information
-   * @param event
-   */
-
   handleStorageRegistered(event: StorageRegisteredEvent) {
-    this.currentStorageCapacity += event.capacity;
+    const capacity = parseInt(event.capacity, 10);
+    this.currentStorageCapacity += capacity;
+    console.log("currentStorageCapacity", this.currentStorageCapacity)
   }
 
   handleStorageDisabled(event: StorageDisabledEvent) {
-    this.currentStorageCapacity -= event.capacity;
+    const capacity = parseInt(event.capacity, 10);
+    this.currentStorageCapacity -= capacity;
+    console.log("currentStorageCapacity", this.currentStorageCapacity)
   }
 }

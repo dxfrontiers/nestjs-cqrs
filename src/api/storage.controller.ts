@@ -17,7 +17,7 @@ export class StorageUnitController {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Post('/register')
-  async registerStorage(@Query('capacity') capacity: number): Promise<any> {
+  async registerStorage(@Query('capacity') capacity: string): Promise<any> {
     const aggregateId = uuid()
     await this.commandBus.execute(
       new RegisterStorageUnitCommand(aggregateId, capacity),

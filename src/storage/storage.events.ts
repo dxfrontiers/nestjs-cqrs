@@ -4,7 +4,7 @@ import {IEvent} from "@nestjs/cqrs";
 export class StorageEvent implements IEvent {
   constructor(
       public readonly aggregateId: UUID,
-      public readonly capacity: number
+      public readonly capacity: string
   ) {}
 }
 

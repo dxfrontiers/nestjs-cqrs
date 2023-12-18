@@ -3,7 +3,7 @@ import {ICommand} from '@nestjs/cqrs'
 export class RegisterStorageUnitCommand implements ICommand {
   constructor(
     public readonly aggregateId: string,
-    public readonly capacity: number,
+    public readonly capacity: string,
   ) {}
 }
 

@@ -14,14 +14,14 @@ import {client as eventStore} from '../eventstore'
 
 export class StorageAggregate extends AggregateRoot {
   private id: string;
-  private capacity: number;
+  private capacity: string;
   disabled: boolean = false;
 
   constructor() {
     super();
   }
 
-  registerStorage(aggregateId: string, capacity: number) {
+  registerStorage(aggregateId: string, capacity: string) {
     this.apply(new StorageRegisteredEvent(aggregateId, capacity));
   }
 
@@ -63,7 +63,7 @@ export class StorageAggregate extends AggregateRoot {
           case 'StorageUnitCreated':
             aggregate.applyStorageRegisteredEventToAggregate({
               aggregateId: data.id,
-              capacity: parseInt(data.capacity),
+              capacity: data.capacity,
             });
             break;
           case 'StorageUnitDisabled':
@@ -177,10 +177,6 @@ export class StorageRegisteredEventHandler
         [eventData],
     )
 
-    if (result.success) {
-      this.capacityProjection.handleStorageRegistered(event)
-    }
-
     console.log('result: ', result)
   }
 }
@@ -203,10 +199,7 @@ export class StorageDisabledEventHandler implements IEventHandler<StorageDisable
         'storage-unit-stream-' + event.aggregateId,
         [eventData],
     );
-
-    if (result.success) {
-      this.capacityProjection.handleStorageDisabled(event);
-    }
+    
     console.log('StorageDisabledEvent result: ', result);
   }
 }
