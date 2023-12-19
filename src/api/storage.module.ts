@@ -3,8 +3,10 @@ import {CqrsModule} from '@nestjs/cqrs';
 import {StorageUnitController} from './storage.controller';
 import {
   DisableStorageUnitHandler,
+  EnableStorageUnitHandler,
   RegisterStorageUnitHandler,
   StorageDisabledEventHandler,
+  StorageEnabledEventHandler,
   StorageRegisteredEventHandler
 } from '../storage/storage.aggregate';
 import {StorageCapacityProjection} from "../capacity/storage-capacity.projection";
@@ -14,8 +16,10 @@ import {StorageCapacityProjection} from "../capacity/storage-capacity.projection
   controllers: [StorageUnitController],
   providers: [
     RegisterStorageUnitHandler,
+    EnableStorageUnitHandler,
     DisableStorageUnitHandler,
     StorageRegisteredEventHandler,
+    StorageEnabledEventHandler,
     StorageDisabledEventHandler,
     StorageCapacityProjection,
   ],

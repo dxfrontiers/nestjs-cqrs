@@ -1,15 +1,21 @@
 import {EventsHandler, IEventHandler} from '@nestjs/cqrs';
-import {StorageDisabledEvent, StorageRegisteredEvent} from '../storage/storage.events';
+import {StorageDisabledEvent, StorageEnabledEvent, StorageRegisteredEvent} from '../storage/storage.events';
 
-@EventsHandler(StorageRegisteredEvent, StorageDisabledEvent)
-export class StorageCapacityProjection implements IEventHandler<StorageRegisteredEvent | StorageDisabledEvent> {
+@EventsHandler(StorageRegisteredEvent, StorageDisabledEvent, StorageEnabledEvent)
+export class StorageCapacityProjection implements IEventHandler<StorageRegisteredEvent | StorageDisabledEvent | StorageEnabledEvent> {
   private currentStorageCapacity: number = 0;
 
-  handle(event: StorageRegisteredEvent | StorageDisabledEvent): void {
+  constructor() {
+    console.log('StorageCapacityProjection instance created:', this);
+  }
+
+  handle(event: StorageRegisteredEvent | StorageDisabledEvent | StorageEnabledEvent): void {
     if (event instanceof StorageRegisteredEvent) {
       this.handleStorageRegistered(event);
     } else if (event instanceof StorageDisabledEvent) {
       this.handleStorageDisabled(event);
+    } else if (event instanceof StorageEnabledEvent) {
+      this.handleStorageEnabled(event);
     }
   }
 
@@ -22,6 +28,12 @@ export class StorageCapacityProjection implements IEventHandler<StorageRegistere
   handleStorageDisabled(event: StorageDisabledEvent) {
     const capacity = parseInt(event.capacity, 10);
     this.currentStorageCapacity -= capacity;
+    console.log("currentStorageCapacity", this.currentStorageCapacity)
+  }
+
+  handleStorageEnabled(event: StorageEnabledEvent) {
+    const capacity = parseInt(event.capacity, 10);
+    this.currentStorageCapacity += capacity;
     console.log("currentStorageCapacity", this.currentStorageCapacity)
   }
 }

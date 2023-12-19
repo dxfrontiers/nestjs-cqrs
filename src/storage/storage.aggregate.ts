@@ -8,7 +8,6 @@ import {
 } from '@nestjs/cqrs'
 import {StorageDisabledEvent, StorageEnabledEvent, StorageRegisteredEvent} from './storage.events'
 import {DisableStorageUnitCommand, EnableStorageUnitCommand, RegisterStorageUnitCommand,} from './storage.commands'
-import {StorageCapacityProjection} from '../capacity/storage-capacity.projection'
 import {jsonEvent} from "@eventstore/db-client";
 import {client as eventStore} from '../eventstore'
 
@@ -70,7 +69,7 @@ export class StorageAggregate extends AggregateRoot {
             aggregate.applyStorageDisabledEventToAggregate();
             break;
           case 'StorageUnitEnabled':
-            aggregate.applyStorageDisabledEventToAggregate();
+            aggregate.applyStorageEnabledEventToAggregate();
             break;
           default:
             break
@@ -156,8 +155,6 @@ export class EnableStorageUnitHandler implements ICommandHandler<EnableStorageUn
 export class StorageRegisteredEventHandler
   implements IEventHandler<StorageRegisteredEvent>
 {
-  constructor(private readonly capacityProjection: StorageCapacityProjection) {}
-
   async handle(event: StorageRegisteredEvent): Promise<void> {
     const eventData = jsonEvent({
       type: 'StorageUnitCreated',
@@ -176,11 +173,26 @@ export class StorageRegisteredEventHandler
 
 @EventsHandler(StorageDisabledEvent)
 export class StorageDisabledEventHandler implements IEventHandler<StorageDisabledEvent> {
-  constructor(private readonly capacityProjection: StorageCapacityProjection) {}
-
   async handle(event: StorageDisabledEvent): Promise<void> {
     const eventData = jsonEvent({
       type: 'StorageUnitDisabled',
+      data: {
+        id: event.aggregateId,
+        disabledCapacity: event.capacity,
+      },
+    });
+    await eventStore.appendToStream(
+        'storage-unit-stream-' + event.aggregateId,
+        [eventData],
+    );
+  }
+}
+
+@EventsHandler(StorageEnabledEvent)
+export class StorageEnabledEventHandler implements IEventHandler<StorageEnabledEvent> {
+  async handle(event: StorageEnabledEvent): Promise<void> {
+    const eventData = jsonEvent({
+      type: 'StorageUnitEnabled',
       data: {
         id: event.aggregateId,
         disabledCapacity: event.capacity,

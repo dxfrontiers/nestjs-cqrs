@@ -19,26 +19,20 @@ export class StorageUnitController {
   @Post('/register')
   async registerStorage(@Query('capacity') capacity: string): Promise<any> {
     const aggregateId = uuid()
-    await this.commandBus.execute(
-      new RegisterStorageUnitCommand(aggregateId, capacity),
-    )
-    return { message: 'Storage unit registered successfully', aggregateId };
+    await this.commandBus.execute(new RegisterStorageUnitCommand(aggregateId, capacity))
+    return { message: 'command received', aggregateId };
   }
 
   @Post('/:id/disable')
   async disableStorage(@Param('id') id: string): Promise<any> {
-    // TODO: Schauen, wann und wie der Command nicht ausgeführt werden kann
-    // wenn schon disabled und entsprechende Response an Client
     await this.commandBus.execute(new DisableStorageUnitCommand(id))
-    return { message: 'Storage unit disabled successfully' };
+    return { message: 'Command Received' };
   }
 
   @Post('/:id/enable')
   async enableStorage(@Param('id') id: string): Promise<any> {
-    // TODO: Schauen, wann und wie der Command nicht ausgeführt werden kann
-    // wenn schon enabled und entsprechende Response an Client
     await this.commandBus.execute(new EnableStorageUnitCommand(id))
-    return { message: 'Storage unit enabled successfully' };
+    return { message: 'Command received' };
   }
 
   @Get('/currentCapacity')
