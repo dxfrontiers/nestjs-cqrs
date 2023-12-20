@@ -195,7 +195,7 @@ export class StorageEnabledEventHandler implements IEventHandler<StorageEnabledE
       type: 'StorageUnitEnabled',
       data: {
         id: event.aggregateId,
-        disabledCapacity: event.capacity,
+        enabledCapacity: event.capacity,
       },
     });
     await eventStore.appendToStream(
